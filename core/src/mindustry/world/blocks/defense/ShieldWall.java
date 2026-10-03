@@ -50,6 +50,7 @@ public class ShieldWall extends Wall{
             if(shieldRadius > 0){
                 float radius = shieldRadius * tilesize * size / 2f;
 
+                if(renderer.animateShields) renderer.shieldQueued = true;
                 Draw.z(Layer.shields);
 
                 Draw.color(team.color, Color.white, Mathf.clamp(hit));

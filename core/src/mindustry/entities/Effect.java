@@ -177,6 +177,11 @@ public class Effect{
     public float render(int id, Color color, float life, float lifetime, float rotation, float x, float y, Object data){
         container.set(id, color, life, lifetime, rotation, x, y, data);
         Draw.z(layer);
+        if(layer > Layer.buildBeam - 1f && layer < Layer.buildBeam + 1f){
+            Vars.renderer.beamQueued = true;
+        }else if(layer > Layer.shields - 1f && layer < Layer.shields + 1f){
+            Vars.renderer.shieldQueued = true;
+        }
         Draw.reset();
         render(container);
         Draw.reset();

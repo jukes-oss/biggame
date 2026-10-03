@@ -215,6 +215,7 @@ public class ShieldArcAbility extends Ability{
     @Override
     public void draw(Unit unit){
         if(widthScale > 0.001f){
+            if(Vars.renderer.animateShields) Vars.renderer.shieldQueued = true;
             Draw.z(Layer.shields);
 
             Draw.color(color == null ? unit.type.shieldColor(unit) : color, Color.white, Mathf.clamp(alpha));

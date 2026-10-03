@@ -628,6 +628,7 @@ public class UnitAssembler extends PayloadBlock{
 
             Draw.reset();
 
+            if(renderer.animateShields) renderer.beamQueued = true;
             Draw.z(Layer.buildBeam);
 
             //draw unit silhouette
