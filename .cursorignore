@@ -1,0 +1,31 @@
+# 不让 Cursor 索引的内容：构建产物、二进制资源和其他语言的翻译文件
+# （这些文件仍在仓库里，只是不进入 AI 的索引，能显著减少噪音）
+
+**/build/
+.gradle/
+out/
+desktop/build/
+
+# 二进制资源
+**/*.png
+**/*.jpg
+**/*.ogg
+**/*.mp3
+**/*.wav
+**/*.msav
+**/*.ttf
+**/*.otf
+**/*.woff
+**/*.jar
+**/*.dat
+core/assets/sprites/
+core/assets/cubemaps/
+core/assets/music/
+core/assets/sounds/
+core/assets/fonts/
+fastlane/
+
+# 只保留英文和简体中文文本，其余语言不索引
+core/assets/bundles/*
+!core/assets/bundles/bundle.properties
+!core/assets/bundles/bundle_zh_CN.properties

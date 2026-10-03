@@ -1,0 +1,46 @@
+---
+description: Mindustry 项目总览、模块结构与构建命令
+alwaysApply: true
+---
+
+# 项目总览
+
+本仓库是开源游戏 **Mindustry**（自动化塔防 RTS，Java 编写，GPL-3.0）的导入版本，上游为 https://github.com/Anuken/Mindustry 。修改代码时保留 LICENSE 和原作者署名。
+
+用户使用中文交流，回答和注释说明请用中文；代码标识符保持英文。
+
+## 模块
+
+- `core/`：游戏全部逻辑、渲染、UI、内容，几乎所有改动都在这里。
+  - `core/src/mindustry/content/`：游戏内容定义（`Blocks`、`Items`、`UnitTypes`、`Bullets`、`Planets`、科技树等）。加新方块/单位/物品从这里开始。
+  - `core/src/mindustry/world/blocks/`：方块的行为实现（防御、传送、生产、电力、液体、单位工厂……）。
+  - `core/src/mindustry/entities/comp/`：实体组件（`*Comp.java`），由注解处理器合成实体类。
+  - `core/src/mindustry/type/`：`UnitType`、`Item`、`Weapon` 等类型定义。
+  - `core/src/mindustry/ui/`、`core/src/mindustry/graphics/`、`core/src/mindustry/logic/`、`core/src/mindustry/net/`。
+  - `core/assets/`：打包进游戏的资源；`core/assets/bundles/` 是多语言文本（中文为 `bundle_zh_CN.properties`，英文为 `bundle.properties`）。
+  - `core/assets-raw/sprites/`：原始贴图，需要 `tools:pack` 打包。
+- `desktop/`：PC 启动器（`DesktopLauncher`）。
+- `android/`、`ios/`：移动端启动器。
+- `server/`：专用服务器。
+- `annotations/`：注解处理器，生成 `mindustry.gen` 包。
+- `tools/`：贴图打包等工具。
+- `tests/`：JUnit 测试。
+
+## 生成代码
+
+`mindustry.gen` 包（`Call`、`Unit`、`Building`、`Sounds`、`Tex`、`Icon` 等）在构建时生成，仓库里没有源码，**不要手写或修改它**。要改实体行为就改 `entities/comp/` 下的组件；要加网络调用就用 `@Remote` 注解。找不到某个类时先跑一次构建。
+
+## 构建与运行
+
+必须使用 **JDK 17**，其他版本无法构建。
+
+- 运行 PC 版：`./gradlew desktop:run`（Windows 用 `gradlew desktop:run`）
+- 打包 PC 版：`./gradlew desktop:dist` → `desktop/build/libs/Mindustry.jar`
+- 打包服务器：`./gradlew server:dist`
+- 运行测试：`./gradlew tests:test`
+- 打包贴图：`./gradlew tools:pack`（改了 `assets-raw` 里的图片后需要）
+- 安卓调试包：`./gradlew android:assembleDebug`（需要 Android SDK 和 `ANDROID_HOME`）
+
+强烈建议把 https://github.com/Anuken/Arc 克隆到本仓库的**同级目录** `../Arc`，Gradle 会自动使用本地 Arc，避免 jitpack 下载失败。
+
+改完代码至少要能编译通过（`./gradlew desktop:dist` 或 `./gradlew tests:test`），涉及玩法的改动要实际运行游戏验证。

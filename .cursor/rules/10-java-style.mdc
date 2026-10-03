@@ -1,0 +1,36 @@
+---
+description: Mindustry Java 代码风格与平台兼容限制，编写或修改 Java 代码时必须遵守
+globs: **/*.java
+alwaysApply: false
+---
+
+# Java 代码风格（来自上游 CONTRIBUTING.md）
+
+## 格式
+
+- 括号周围不加空格：`if(cond){`、`for(int i = 0; i < n; i++){`、`(SomeType)obj`
+- 大括号不换行，4 空格缩进。
+- 全部使用 `camelCase`，**常量和枚举也一样**，不用 `SCREAMING_CASE`，不用下划线。
+- 不写无大括号的 if/else；只有单行的 `if(cond) return;` 这类可以例外。
+- 一律使用通配符导入：`import arc.struct.*;`
+- Javadoc 能写成单行就写单行：`/** @return ... */`
+- 变量和方法名尽量短。
+- 不写多余的 getter/setter，直接用 public/protected 字段。
+- 代码块不大且只用一两处时不要拆成单独方法。
+
+## 平台兼容（安卓 / iOS 也要能跑）
+
+- **禁止**使用 `java.util.function`、`java.util.stream`、集合的 `forEach`、`java.lang.Objects`、`java.awt`。
+- 函数式接口用 `arc.func`（`Cons`、`Prov`、`Func`、`Boolf` 等）。
+- 标准库只用 `java.io` / `java.nio` / `java.net` / `java.util` 里的基础类。
+
+## 使用 Arc 的集合与工具类
+
+- `ArrayList`/`List` → `Seq`，`HashMap` → `ObjectMap`，`HashSet` → `ObjectSet`，`Queue` → `arc.struct.Queue`
+- 不用装箱类型集合：`Seq<Integer>` → `IntSeq`，`ObjectMap<Integer, T>` → `IntMap<T>`
+- 只有确实需要并发时才用 `java.util.concurrent` 里的类。
+
+## 性能
+
+- 主循环（`update`、`draw` 等每帧调用的方法）里**不要 new 对象**。
+- 向量/几何运算用 `Tmp.v1`、`Tmp.r1` 等临时变量；需要对象时用 `Pools` 取用和归还；列表用静态字段复用并在使用前 `clear()`。

@@ -1,0 +1,15 @@
+---
+description: 新增或修改游戏内容（方块、单位、物品、子弹、科技树、多语言文本）时的做法
+globs: core/src/mindustry/content/**/*.java,core/src/mindustry/world/**/*.java,core/src/mindustry/type/**/*.java,core/assets/bundles/**
+alwaysApply: false
+---
+
+# 游戏内容开发
+
+- 内容在 `core/src/mindustry/content/` 的 `load()` 方法里以字段 + 匿名初始化块的方式定义，例如 `Blocks.java` 里的 `duo = new ItemTurret("duo"){{ ... }};`。新增内容时模仿相邻的同类定义。
+- 内容的内部名（构造参数里的字符串）用小写加连字符，如 `"plastanium-conveyor"`；贴图文件名与之对应。
+- 新方块/单位/物品必须在 `core/assets/bundles/bundle.properties` 中添加名称和描述（键形如 `block.<name>.name`、`block.<name>.description`），中文写在 `bundle_zh_CN.properties`。
+- 新内容要接入科技树（`SerpuloTechTree.java` 或 `ErekirTechTree.java`），否则战役里无法解锁。
+- 新贴图放进 `core/assets-raw/sprites/` 对应目录，然后执行 `./gradlew tools:pack`。
+- 新方块的行为类放在 `core/src/mindustry/world/blocks/` 对应子目录，内部的 `Building` 子类写成 `public class XxxBuild extends Building`。
+- 修改已有数值时，注意存档兼容：不要随意改内容的内部名或删除已有内容。
