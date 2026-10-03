@@ -16,6 +16,7 @@ import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.content.*;
+import mindustry.ctype.*;
 import mindustry.content.TechTree.*;
 import mindustry.core.*;
 import mindustry.game.EventType.*;
@@ -315,6 +316,24 @@ public class ResearchDialog extends BaseDialog{
         rebuildItems();
     }
 
+    /** 把科技树平移到指定内容，方便开局点选。 */
+    public void panTo(UnlockableContent content){
+        if(content == null || content.techNode == null) return;
+
+        TechNode rootNode = content.techNode.rootNode == null ? content.techNode : content.techNode.rootNode;
+        if(lastNode != rootNode){
+            rebuildTree(rootNode);
+        }
+
+        for(TechTreeNode node : nodes){
+            if(node.node.content == content){
+                view.panX = -node.x;
+                view.panY = -node.y;
+                break;
+            }
+        }
+    }
+
     public void rebuildTree(TechNode node){
         switchTree(node);
         view.panX = 0f;
@@ -509,7 +528,11 @@ public class ResearchDialog extends BaseDialog{
                     button.getStyle().up = !locked(node.node) ? Tex.buttonOver : !selectable(node.node) || (!canSpend(node.node) && !net.client()) ? Tex.buttonRed : Tex.button;
 
                     ((TextureRegionDrawable)button.getStyle().imageUp).setRegion(node.selectable ? node.node.content.uiIcon : Icon.lock.getRegion());
-                    button.getImage().setColor(!locked(node.node) ? Color.white : node.selectable ? Color.gray : Pal.gray);
+                    Color img = !locked(node.node) ? Color.white : node.selectable ? Color.gray : Pal.gray;
+                    if(ui.opening != null && ui.opening.highlight() == node.node.content){
+                        img = Tmp.c1.set(img).lerp(Pal.accent, Mathf.absin(Time.time, 5f, 0.65f));
+                    }
+                    button.getImage().setColor(img);
                     button.getImage().layout();
                 });
                 addChild(button);

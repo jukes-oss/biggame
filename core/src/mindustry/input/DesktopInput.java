@@ -555,7 +555,7 @@ public class DesktopInput extends InputHandler{
 
         table.button(Icon.tree, Styles.clearNonei, () -> {
             ui.research.show();
-        }).visible(() -> state.isCampaign()).tooltip("@research");
+        }).visible(() -> state.isCampaign()).tooltip("@research").name("research");
 
         table.button(Icon.map, Styles.clearNonei, () -> {
             ui.planet.show();

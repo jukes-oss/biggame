@@ -287,6 +287,13 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
             lookAt(state.planet.getLastSector());
         }
 
+        // 还没有基地时直接选中起点，发射按钮可以马上点。
+        if(openingLaunch(state.planet.getStartSector())){
+            selected = state.planet.getStartSector();
+            lookAt(selected);
+            updateSelected();
+        }
+
         return super.show();
     }
 
@@ -1337,6 +1344,10 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
 
             boolean noCandidate = hasNoCandidate(sector);
 
+            if(openingLaunch(sector)){
+                stable.add(openingLaunchText()).color(Pal.accent).padTop(4f).row();
+            }
+
             stable.button(
                 mode == select ? "@sectors.select" :
                 sector.isBeingPlayed() ? "@sectors.resume" :
@@ -1344,7 +1355,11 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
                 locked ? "@locked" :
                 noCandidate ? "@sectors.nolaunchcandidate" :
                 "@sectors.launch",
-                locked ? Icon.lock : Icon.play, this::playSelected).growX().height(54f).minWidth(170f).padTop(4).disabled(locked || noCandidate);
+                locked ? Icon.lock : Icon.play, this::playSelected).growX().height(54f).minWidth(170f).padTop(4).disabled(locked || noCandidate).update(b -> {
+                if(openingLaunch(sector)){
+                    b.color.set(Color.white).lerp(Pal.accent, Mathf.absin(Time.time, 5f, 0.35f));
+                }
+            });
         }
 
         stable.pack();
@@ -1355,6 +1370,20 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
 
     boolean hasNoCandidate(Sector sector){
         return sector != sector.planet.getStartSector() && !sector.hasBase() && findLauncher(sector) == null;
+    }
+
+    /** 新战役还没落地时，提示去点起点的发射。 */
+    boolean openingLaunch(Sector sector){
+        return mode == look && sector != null && sector.planet == Planets.serpulo
+            && sector == sector.planet.getStartSector()
+            && !sector.planet.sectors.contains(Sector::hasBase)
+            && !settings.getBool("opening-guide-done", false);
+    }
+
+    String openingLaunchText(){
+        String key = mobile ? "opening.launch" : "opening.launch.desktop";
+        if(!bundle.has(key)) key = "opening.launch";
+        return bundle.get(key);
     }
 
     boolean isLocked(Sector sector){
