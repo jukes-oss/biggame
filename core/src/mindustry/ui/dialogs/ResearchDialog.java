@@ -37,7 +37,7 @@ import static mindustry.gen.Tex.*;
 public class ResearchDialog extends BaseDialog{
     public static boolean debugShowRequirements = false;
 
-    public final float nodeSize = Scl.scl(60f);
+    public final float nodeSize = Scl.scl(mobile ? 74f : 60f);
     public ObjectSet<TechTreeNode> nodes = new ObjectSet<>();
     public TechTreeNode root = new TechTreeNode(TechTree.roots.first(), null);
     public TechNode lastNode = root.node;
@@ -87,7 +87,7 @@ public class ResearchDialog extends BaseDialog{
             new BaseDialog("@techtree.select"){{
                 cont.pane(t -> {
                     t.table(Tex.button, in -> {
-                        in.defaults().width(300f).height(60f);
+                        in.defaults().width(mobile ? 280f : 300f).height(mobile ? 68f : 60f);
                         for(TechNode node : TechTree.roots){
                             if(node.requiresUnlock && !node.content.unlockedHost() && node != getPrefRoot()) continue;
 
@@ -141,7 +141,7 @@ public class ResearchDialog extends BaseDialog{
 
         hidden(ui.planet::setup);
 
-        addCloseButton();
+        addCloseButton(mobile ? 260f : 210f);
 
         keyDown(key -> {
             if(key == Binding.research.value.key){
@@ -149,10 +149,11 @@ public class ResearchDialog extends BaseDialog{
             }
         });
 
+        if(mobile) buttons.row();
         buttons.button("@database", Icon.book, () -> {
             hide();
             ui.database.show();
-        }).size(210f, 64f).name("database");
+        }).size(mobile ? 260f : 210f, 64f).name("database");
 
         //scaling/drag input
         addListener(new InputListener(){
@@ -475,7 +476,7 @@ public class ResearchDialog extends BaseDialog{
 
             for(TechTreeNode node : nodes){
                 ImageButton button = new ImageButton(node.node.content.uiIcon, Styles.nodei);
-                button.resizeImage(32f);
+                button.resizeImage(mobile ? 46f : 32f);
                 button.getImage().setScaling(Scaling.fit);
                 button.visible(() -> node.visible);
                 if(!net.client()){
@@ -687,10 +688,10 @@ public class ResearchDialog extends BaseDialog{
                 b.left();
                 b.margin(0).left().defaults().left();
 
-                if(selectable){
+                if(selectable && !mobile){
                     b.button(Icon.info, Styles.flati, () -> ui.content.show(node.content)).growY().width(50f);
+                    b.add().grow();
                 }
-                b.add().grow();
                 b.table(desc -> {
                     desc.left().defaults().left();
                     desc.add(selectable ? node.content.localizedName : "[accent]???");
@@ -778,6 +779,11 @@ public class ResearchDialog extends BaseDialog{
                     }
                 }).pad(9).left().growX();
 
+                if(mobile && selectable){
+                    b.row();
+                    b.button(Icon.info, Styles.flati, () -> ui.content.show(node.content)).size(56f).padTop(8f).left();
+                }
+
                 if(mobile && locked(node) && !net.client()){
                     b.row();
                     b.button("@research", Icon.ok, new TextButtonStyle(){{
@@ -787,7 +793,7 @@ public class ResearchDialog extends BaseDialog{
                         disabledFontColor = Color.gray;
                         up = buttonOver;
                         over = buttonDown;
-                    }}, () -> spend(node)).disabled(i -> !canSpend(node)).growX().height(44f).colspan(3);
+                    }}, () -> spend(node)).disabled(i -> !canSpend(node)).growX().height(56f).padTop(8f).colspan(3);
                 }
             }).growX().left();
 

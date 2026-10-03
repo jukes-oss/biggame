@@ -284,16 +284,19 @@ public class PlacementFragment{
                 //rebuilds the category table with the correct recipes
                 Runnable rebuildCategory = () -> {
                     blockTable.clear();
-                    blockTable.top().margin(5);
+                    blockTable.top().margin(mobile ? 6f : 5f);
 
                     int index = 0;
+                    // 手机上格子加大；竖屏改成 3 列，给左侧操作钮留出空档。
+                    int columns = !mobile ? rowWidth : Core.graphics.isPortrait() ? 3 : rowWidth;
+                    float bsize = !mobile ? 46f : Core.graphics.isPortrait() ? 60f : 58f;
 
                     ButtonGroup<ImageButton> group = new ButtonGroup<>();
                     group.setMinCheckCount(0);
 
                     for(Block block : getUnlockedByCategory(currentCategory)){
                         if(!unlocked(block)) continue;
-                        if(index++ % rowWidth == 0){
+                        if(index++ % columns == 0){
                             blockTable.row();
                         }
 
@@ -307,8 +310,8 @@ public class PlacementFragment{
                                     selectedBlocks.put(currentCategory, control.input.block);
                                 }
                             }
-                        }).size(46f).group(group).name("block-" + block.name).get();
-                        button.resizeImage(iconMed);
+                        }).size(bsize).pad(mobile ? 2f : 0f).group(group).name("block-" + block.name).get();
+                        button.resizeImage(mobile ? iconMed + 6f : iconMed);
 
                         button.update(() -> { //color unplacable things gray
                             Building core = player.core();
@@ -329,9 +332,9 @@ public class PlacementFragment{
                         });
                     }
                     //add missing elements to even out table size
-                    if(index < 4){
-                        for(int i = 0; i < 4-index; i++){
-                            blockTable.add().size(46f);
+                    if(index < columns){
+                        for(int i = 0; i < columns - index; i++){
+                            blockTable.add().size(bsize);
                         }
                     }
                     blockTable.act(0f);
@@ -383,15 +386,15 @@ public class PlacementFragment{
                                 }
                                 String keyComboFinal = keyCombo;
                                 header.left();
-                                header.add(new Image(displayBlock.uiIcon)).scaling(Scaling.fit).size(8 * 4);
+                                header.add(new Image(displayBlock.uiIcon)).scaling(Scaling.fit).size(mobile ? 8 * 5 : 8 * 4).padRight(mobile ? 6f : 0f);
                                 header.labelWrap(() -> !unlocked(displayBlock) ? Core.bundle.get("block.unknown") : displayBlock.localizedName + keyComboFinal)
-                                .left().width(190f).padLeft(5);
+                                .left().width(mobile ? 128f : 190f).padLeft(5);
                                 header.add().growX();
                                 if(unlocked(displayBlock)){
                                     header.button("?", Styles.flatBordert, () -> {
                                         ui.content.show(displayBlock);
                                         Events.fire(new BlockInfoEvent());
-                                    }).size(8 * 5).padTop(-5).padRight(-5).right().grow().name("blockinfo");
+                                    }).size(mobile ? 48f : 8 * 5).pad(mobile ? 2f : 0f).padTop(mobile ? 0f : -5).padRight(mobile ? 2f : -5).right().grow().name("blockinfo");
                                 }
                             }).growX().left();
                             topTable.row();
@@ -402,8 +405,8 @@ public class PlacementFragment{
                                 for(ItemStack stack : displayBlock.requirements){
                                     req.table(line -> {
                                         line.left();
-                                        line.image(stack.item.uiIcon).size(8 * 2);
-                                        line.add(stack.item.localizedName).maxWidth(140f).fillX().color(Color.lightGray).padLeft(2).left().get().setEllipsis(true);
+                                        line.image(stack.item.uiIcon).size(mobile ? 8 * 3 : 8 * 2).padRight(mobile ? 4f : 0f);
+                                        line.add(stack.item.localizedName).maxWidth(mobile ? 96f : 140f).fillX().color(Color.lightGray).padLeft(2).left().get().setEllipsis(true);
                                         line.label(() -> {
                                             Building core = player.core();
                                             int stackamount = Math.round(stack.amount * state.rules.buildCostMultiplier);
@@ -578,7 +581,7 @@ public class PlacementFragment{
                                         for(var command : commands){
                                             coms.button(Icon.icons.get(command.icon, Icon.cancel), Styles.clearNoneTogglei, () -> {
                                                 Call.setUnitCommand(player, units.mapInt(un -> un.id, un -> un.type.allowCommand(un, command)).toArray(), command);
-                                            }).checked(i -> activeCommands.get(command.id)).size(50f).tooltip(command.localized(), true);
+                                            }).checked(i -> activeCommands.get(command.id)).size(mobile ? 58f : 50f).tooltip(command.localized(), true);
 
                                             if(++scol % 6 == 0) coms.row();
                                         }
@@ -601,7 +604,7 @@ public class PlacementFragment{
 
                                             coms.button(stance.getIcon(), Styles.clearNoneTogglei, () -> {
                                                 Call.setUnitStance(player, units.mapInt(un -> un.id, un -> un.type.allowStance(un, stance)).toArray(), stance, !activeStances.get(stance.id));
-                                            }).checked(i -> activeStances.get(stance.id)).size(50f).tooltip(stance.localized(), true);
+                                            }).checked(i -> activeStances.get(stance.id)).size(mobile ? 58f : 50f).tooltip(stance.localized(), true);
 
                                             if(++scol % 6 == 0) coms.row();
                                         }
@@ -676,7 +679,7 @@ public class PlacementFragment{
                 {
                     blockCatTable.table(Tex.pane2, blocksSelect -> {
                         blocksSelect.margin(4).marginTop(0);
-                        blockPane = blocksSelect.pane(blocks -> blockTable = blocks).height(194f).update(pane -> {
+                        blockPane = blocksSelect.pane(blocks -> blockTable = blocks).height(!mobile ? 194f : Core.graphics.isPortrait() ? 210f : 200f).update(pane -> {
                             if(pane.hasScroll()){
                                 Element result = Core.scene.getHoverElement();
                                 if(result == null || !result.isDescendantOf(pane)){
@@ -701,7 +704,7 @@ public class PlacementFragment{
                                 getDrawable().draw(x, y, width, height - Scl.scl(3f));
                             }
                         }).colspan(2).growX().growY().padTop(-3f).row();
-                        categories.defaults().size(50f);
+                        categories.defaults().size(mobile ? 56f : 50f).pad(mobile ? 2f : 0f);
 
                         ButtonGroup<ImageButton> group = new ButtonGroup<>();
 

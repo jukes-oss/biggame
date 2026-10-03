@@ -7,6 +7,8 @@ import arc.input.*;
 import arc.math.*;
 import arc.math.geom.*;
 import arc.scene.*;
+import arc.scene.event.*;
+import arc.scene.ui.*;
 import arc.scene.ui.ImageButton.*;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
@@ -190,7 +192,10 @@ public class MobileInput extends InputHandler implements GestureListener{
 
     @Override
     public void buildPlacementUI(Table table){
-        table.left().margin(0f).defaults().size(48f);
+        boolean portrait = Core.graphics.isPortrait();
+        // 竖屏两列，避免四个按钮把建造栏撑到屏幕左边的操作钮上。
+        float size = portrait ? 64f : 56f;
+        table.left().margin(0f).defaults().size(size).pad(portrait ? 3f : 2f);
 
         table.button(Icon.hammer, Styles.clearNoneTogglei, () -> {
             mode = mode == breaking ? block == null ? none : placing : breaking;
@@ -201,6 +206,8 @@ public class MobileInput extends InputHandler implements GestureListener{
         table.button(Icon.diagonal, Styles.clearNoneTogglei, () -> {
             Core.settings.put("swapdiagonal", !Core.settings.getBool("swapdiagonal"));
         }).update(l -> l.setChecked(Core.settings.getBool("swapdiagonal")));
+
+        if(portrait) table.row();
 
         //rotate button
         table.button(Icon.right, Styles.clearNoneTogglei, () -> {
@@ -281,6 +288,8 @@ public class MobileInput extends InputHandler implements GestureListener{
         group.fill(t -> {
             t.visible(this::showCancel);
             t.bottom().left();
+            boolean portrait = Core.graphics.isPortrait();
+            float side = portrait ? 64f : 56f;
             t.button(Icon.cancel, Styles.cleari, () -> {
                 if(!player.dead()){
                     player.unit().clearBuilding();
@@ -288,33 +297,50 @@ public class MobileInput extends InputHandler implements GestureListener{
                 selectPlans.clear();
                 mode = none;
                 block = null;
-            }).width(155f/2f).height(50f).margin(12f);
+            }).size(side).margin(10f);
 
-            t.button(Icon.pause, Styles.clearTogglei, () -> isBuilding = !isBuilding).width(155f/2f).checked(b -> {
+            if(portrait) t.row();
+
+            t.button(Icon.pause, Styles.clearTogglei, () -> isBuilding = !isBuilding).size(side).checked(b -> {
                 boolean paused = !isBuilding;
                 b.getStyle().imageUp = !paused ? Icon.pause : Icon.play;
                 return paused;
-            }).height(50f).margin(12f);
+            }).margin(10f);
         });
 
         group.fill(t -> {
             t.visible(() -> !hasSchematic() && !ui.consolefrag.shown() && !(state.isEditor()&& Core.settings.getBool("editor-blocks-shown")));
             t.bottom().left();
 
-            t.button("@command.queue", Icon.rightOpen, Styles.clearTogglet, () -> {
-                queueCommandMode = !queueCommandMode;
-            }).width(155f).height(48f).margin(12f).checked(b -> queueCommandMode).visible(() -> commandMode).row();
+            boolean portrait = Core.graphics.isPortrait();
+            float side = portrait ? 64f : 56f;
 
-            t.button("@command", Icon.units, Styles.clearTogglet, () -> {
-                commandMode = !commandMode;
-                if(commandMode){
-                    block = null;
-                    rebuildMode = false;
-                    mode = none;
-                }
-            }).width(155f).height(48f).margin(12f).checked(b -> commandMode).visible(() -> !control.input.logicHideHud).row();
+            t.table(c -> {
+                c.button(Icon.rightOpen, Styles.clearTogglei, () -> {
+                    queueCommandMode = !queueCommandMode;
+                }).size(side).checked(b -> queueCommandMode);
+                c.row();
+                Label label = c.add("@command.queue").growX().wrap().padTop(4f).get();
+                label.setAlignment(Align.center);
+                label.touchable = Touchable.disabled;
+            }).width(side + 16f).visible(() -> commandMode).row();
 
-            t.spacerY(() -> showCancel() ? 50f : 0f).row();
+            t.table(c -> {
+                c.button(Icon.units, Styles.clearTogglei, () -> {
+                    commandMode = !commandMode;
+                    if(commandMode){
+                        block = null;
+                        rebuildMode = false;
+                        mode = none;
+                    }
+                }).size(side).checked(b -> commandMode);
+                c.row();
+                Label label = c.add("@command").growX().wrap().padTop(4f).get();
+                label.setAlignment(Align.center);
+                label.touchable = Touchable.disabled;
+            }).width(side + 16f).visible(() -> !control.input.logicHideHud).row();
+
+            t.spacerY(() -> showCancel() ? (portrait ? side * 2f + 8f : side) : 0f).row();
 
             //for better looking insets
             t.rect((x, y, w, h) -> {
@@ -328,17 +354,20 @@ public class MobileInput extends InputHandler implements GestureListener{
             t.visible(() -> hasSchematic() && !ui.consolefrag.shown());
             t.bottom().left();
             t.table(Tex.pane, b -> {
-                b.defaults().size(50f);
+                boolean portrait = Core.graphics.isPortrait();
+                b.defaults().size(portrait ? 64f : 56f).pad(3f);
 
                 ImageButtonStyle style = Styles.clearNonei;
 
                 b.button(Icon.save, style, this::showSchematicSave).disabled(f -> lastSchematic == null || lastSchematic.file != null);
+                if(portrait) b.row();
                 b.button(Icon.cancel, style, () -> {
                     selectPlans.clear();
                     lastSchematic = null;
                 });
                 b.row();
                 b.button(Icon.flipX, style, () -> flipPlans(selectPlans, true));
+                if(portrait) b.row();
                 b.button(Icon.flipY, style, () -> flipPlans(selectPlans, false));
                 b.row();
                 b.button(Icon.rotate, style, () -> rotatePlans(selectPlans, 1)).update(i -> {
