@@ -801,7 +801,11 @@ public class Turret extends ReloadTurret{
 
             (shootEffect == null ? type.shootEffect : shootEffect).at(bulletX, bulletY, rotation + angleOffset, type.hitColor);
             (smokeEffect == null ? type.smokeEffect : smokeEffect).at(bulletX, bulletY, rotation + angleOffset, type.hitColor);
-            (type.shootSound != Sounds.none ? type.shootSound : shootSound).at(bulletX, bulletY, Mathf.random(soundPitchMin, soundPitchMax), shootSoundVolume);
+            Sound fired = type.shootSound != Sounds.none ? type.shootSound : shootSound;
+            fired.at(bulletX, bulletY, Mathf.random(soundPitchMin, soundPitchMax), shootSoundVolume);
+            if(fired != Sounds.none){
+                Sounds.explosionDull.at(bulletX, bulletY, Mathf.random(0.9f, 1.15f), shootSoundVolume * 0.22f);
+            }
 
             ammoUseEffect.at(
                 x - Angles.trnsx(rotation, ammoEjectBack),

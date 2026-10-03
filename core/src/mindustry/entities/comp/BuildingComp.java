@@ -1539,7 +1539,11 @@ abstract class BuildingComp implements Posc, Teamc, Healthc, Buildingc, Timerc, 
     }
 
     public void playDestroySound(){
-        block.destroySound.at(tile, Mathf.random(block.destroyPitchMin, block.destroyPitchMax), block.destroySoundVolume);
+        float pitch = Mathf.random(block.destroyPitchMin, block.destroyPitchMax);
+        block.destroySound.at(tile, pitch, block.destroySoundVolume);
+        if(block.destroySound != Sounds.none){
+            Sounds.explosionDull.at(x, y, Mathf.clamp(pitch * 0.65f, 0.5f, 2f), block.destroySoundVolume * 0.42f);
+        }
     }
 
     public String getDisplayName(){

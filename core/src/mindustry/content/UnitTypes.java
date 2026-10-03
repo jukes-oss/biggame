@@ -2519,6 +2519,7 @@ public class UnitTypes{
                 x = 2.75f;
                 y = 1f;
                 top = false;
+                recoil = 3.1f;
                 shootSound = Sounds.shootAlpha;
 
                 bullet = new LaserBoltBulletType(2.5f, 11){{
