@@ -1,1 +1,0 @@
-Keeps a Java resource in the APK so the merged resource jar exists for R8.

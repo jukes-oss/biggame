@@ -6,7 +6,7 @@ buildscript{
     }
 
     dependencies{
-        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath 'com.android.tools.build:gradle:8.13.0'
     }
 }
 
@@ -38,8 +38,6 @@ android{
             aidl.srcDirs = ['src']
             renderscript.srcDirs = ['src']
             res.srcDirs = ['res']
-            //R8 fails with NoSuchFileException on merged_java_res/base.jar when there are no Java resources at all, so keep one
-            resources.srcDirs = ['resources']
             assets.srcDirs = ['assets', 'src/main/assets', '../core/assets/']
 
             if(localArc){
