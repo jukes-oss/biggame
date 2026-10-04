@@ -351,6 +351,7 @@ public class HudFragment{
         });
 
         ui.hints.build(parent);
+        ui.opening.build(parent);
 
         //menu at top left
         parent.fill(cont -> {
@@ -431,7 +432,7 @@ public class HudFragment{
                         }else{
                             ui.database.show();
                         }
-                    }).name("chat").update(i -> {
+                    }).name("research").update(i -> {
                         if(net.active() && mobile){
                             i.getStyle().imageUp = Icon.chat;
                         }else if(state.isCampaign()){

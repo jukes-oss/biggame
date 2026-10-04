@@ -47,6 +47,7 @@ public class UI implements ApplicationListener, Loadable{
     public PlayerListFragment listfrag;
     public LoadingFragment loadfrag;
     public HintsFragment hints;
+    public OpeningGuide opening;
     public PerformanceFragment perffrag;
 
     public WidgetGroup menuGroup, hudGroup;
@@ -191,6 +192,7 @@ public class UI implements ApplicationListener, Loadable{
         menufrag = new MenuFragment();
         hudfrag = new HudFragment();
         hints = new HintsFragment();
+        opening = new OpeningGuide();
         chatfrag = new ChatFragment();
         minimapfrag = new MinimapFragment();
         listfrag = new PlayerListFragment();

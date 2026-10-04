@@ -562,6 +562,9 @@ public class BulletType extends Content implements Cloneable{
     public void hit(Bullet b, float x, float y, boolean createFrags){
         hitEffect.at(x, y, b.rotation(), hitColor);
         hitSound.at(x, y, hitSoundPitch + Mathf.range(hitSoundPitchRange), hitSoundVolume);
+        if(splashDamageRadius > 0f || hitSound == Sounds.explosion || hitSound == Sounds.explosionArtillery){
+            Sounds.explosionDull.at(x, y, Mathf.clamp(hitSoundPitch * 0.7f, 0.5f, 2f), Math.max(hitSoundVolume, 0.45f) * 0.6f);
+        }
 
         Effect.shake(hitShake, hitShake, b);
 

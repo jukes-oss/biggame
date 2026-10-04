@@ -133,6 +133,7 @@ public class ForceFieldAbility extends Ability{
             Draw.color(unit.type.shieldColor(unit), Color.white, Mathf.clamp(alpha));
 
             if(Vars.renderer.animateShields){
+                Vars.renderer.shieldQueued = true;
                 Draw.z(Layer.shields + 0.001f * alpha);
                 Fill.poly(unit.x, unit.y, sides, realRad, rotation);
             }else{

@@ -189,20 +189,32 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
                 state.planet = Planets.sun;
                 Planet[] choices = {Planets.serpulo, Planets.erekir};
                 int i = 0;
+                boolean portrait = mobile && Core.graphics.isPortrait();
                 for(var planet : choices){
                     TextureRegion tex = new TextureRegion(planetTextures[i]);
 
-                    diag.cont.button(b -> {
-                        b.top();
-                        b.add(planet.localizedName).color(Pal.accent).style(Styles.outlineLabel);
-                        b.row();
-                        b.image(new TextureRegionDrawable(tex)).grow().scaling(Scaling.fit);
-                    }, Styles.togglet, () -> selected[0] = planet).size(mobile ? 220f : 320f).group(group);
+                    if(mobile){
+                        // 名字放在按钮外面，按钮只留星球图，竖屏改成上下排。
+                        diag.cont.table(col -> {
+                            col.add(planet.localizedName).color(Pal.accent).style(Styles.outlineLabel).padBottom(8f).row();
+                            col.button(b -> {
+                                b.image(new TextureRegionDrawable(tex)).grow().scaling(Scaling.fit);
+                            }, Styles.togglet, () -> selected[0] = planet).size(portrait ? 200f : 180f).group(group);
+                        }).pad(portrait ? 8f : 6f);
+                        if(portrait) diag.cont.row();
+                    }else{
+                        diag.cont.button(b -> {
+                            b.top();
+                            b.add(planet.localizedName).color(Pal.accent).style(Styles.outlineLabel);
+                            b.row();
+                            b.image(new TextureRegionDrawable(tex)).grow().scaling(Scaling.fit);
+                        }, Styles.togglet, () -> selected[0] = planet).size(320f).group(group);
+                    }
                     i ++;
                 }
 
                 diag.cont.row();
-                diag.cont.label(() -> selected[0] == null ? "@campaign.none" : "@campaign." + selected[0].name).labelAlign(Align.center).style(Styles.outlineLabel).width(440f).wrap().colspan(2);
+                diag.cont.label(() -> selected[0] == null ? "@campaign.none" : "@campaign." + selected[0].name).labelAlign(Align.center).style(Styles.outlineLabel).width(portrait ? 280f : 440f).wrap().colspan(portrait ? 1 : 2);
 
                 diag.buttons.button("@ok", Icon.ok, () -> {
                     state.planet = selected[0];
@@ -210,7 +222,7 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
                     selectSector(state.planet.getStartSector());
                     settings.put("campaignselect", true);
                     diag.hide();
-                }).size(300f, 64f).disabled(b -> selected[0] == null);
+                }).size(mobile ? 280f : 300f, mobile ? 72f : 64f).disabled(b -> selected[0] == null);
 
                 app.post(diag::show);
             }else if(hadSerpuloRemaps && settings.getBoolOnce("serpulo-remaps-notice")){
@@ -287,6 +299,13 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
             lookAt(state.planet.getLastSector());
         }
 
+        // 还没有基地时直接选中起点，发射按钮可以马上点。
+        if(openingLaunch(state.planet.getStartSector())){
+            selected = state.planet.getStartSector();
+            lookAt(selected);
+            updateSelected();
+        }
+
         return super.show();
     }
 
@@ -296,7 +315,7 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
         buttons.bottom();
 
         if(Core.graphics.isPortrait()){
-            buttons.add(sectorTop).colspan(2).fillX().row();
+            buttons.add(sectorTop).growX().row();
             addBack();
             addTech();
         }else{
@@ -309,11 +328,14 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
     }
 
     void addBack(){
-        buttons.button("@back", Icon.left, this::hide).size(200f, 54f).pad(2).bottom();
+        boolean phonePortrait = mobile && Core.graphics.isPortrait();
+        buttons.button("@back", Icon.left, this::hide).size(phonePortrait ? 280f : mobile ? 170f : 200f, mobile ? 64f : 54f).pad(mobile ? 4f : 2f).bottom();
+        if(phonePortrait) buttons.row();
     }
 
     void addTech(){
-        buttons.button("@techtree", Icon.tree, () -> ui.research.show()).size(200f, 54f).visible(() -> mode == look).pad(2).bottom();
+        boolean phonePortrait = mobile && Core.graphics.isPortrait();
+        buttons.button("@techtree", Icon.tree, () -> ui.research.show()).size(phonePortrait ? 280f : mobile ? 170f : 200f, mobile ? 64f : 54f).visible(() -> mode == look).pad(mobile ? 4f : 2f).bottom();
     }
 
     public void showOverview(){
@@ -1207,7 +1229,7 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
                        updateSelected();
                        rebuildList();
                    });
-                }).size(40f).padLeft(4);
+                }).size(mobile ? 48f : 40f).padLeft(4);
             }
 
             var icon = sector.info.contentIcon != null ?
@@ -1322,7 +1344,7 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
         stable.row();
 
         if(sector.hasBase()){
-            stable.button("@stats", Icon.info, Styles.cleart, () -> showStats(sector)).height(40f).fillX().row();
+            stable.button("@stats", Icon.info, Styles.cleart, () -> showStats(sector)).height(mobile ? 52f : 40f).fillX().padTop(mobile ? 4f : 0f).row();
         }
 
         if((sector.hasBase() && mode == look) || canSelect(sector) || (sector.preset != null && sector.preset.alwaysUnlocked) || debugSelect){
@@ -1337,6 +1359,10 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
 
             boolean noCandidate = hasNoCandidate(sector);
 
+            if(openingLaunch(sector)){
+                stable.add(openingLaunchText()).color(Pal.accent).padTop(4f).padBottom(mobile ? 6f : 0f).row();
+            }
+
             stable.button(
                 mode == select ? "@sectors.select" :
                 sector.isBeingPlayed() ? "@sectors.resume" :
@@ -1344,7 +1370,11 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
                 locked ? "@locked" :
                 noCandidate ? "@sectors.nolaunchcandidate" :
                 "@sectors.launch",
-                locked ? Icon.lock : Icon.play, this::playSelected).growX().height(54f).minWidth(170f).padTop(4).disabled(locked || noCandidate);
+                locked ? Icon.lock : Icon.play, this::playSelected).growX().height(mobile ? 64f : 54f).minWidth(mobile ? 220f : 170f).padTop(mobile ? 8f : 4f).disabled(locked || noCandidate).update(b -> {
+                if(openingLaunch(sector)){
+                    b.color.set(Color.white).lerp(Pal.accent, Mathf.absin(Time.time, 5f, 0.35f));
+                }
+            });
         }
 
         stable.pack();
@@ -1355,6 +1385,20 @@ public class PlanetDialog extends BaseDialog implements PlanetInterfaceRenderer{
 
     boolean hasNoCandidate(Sector sector){
         return sector != sector.planet.getStartSector() && !sector.hasBase() && findLauncher(sector) == null;
+    }
+
+    /** 新战役还没落地时，提示去点起点的发射。 */
+    boolean openingLaunch(Sector sector){
+        return mode == look && sector != null && sector.planet == Planets.serpulo
+            && sector == sector.planet.getStartSector()
+            && !sector.planet.sectors.contains(Sector::hasBase)
+            && !settings.getBool("opening-guide-done", false);
+    }
+
+    String openingLaunchText(){
+        String key = mobile ? "opening.launch" : "opening.launch.desktop";
+        if(!bundle.has(key)) key = "opening.launch";
+        return bundle.get(key);
     }
 
     boolean isLocked(Sector sector){

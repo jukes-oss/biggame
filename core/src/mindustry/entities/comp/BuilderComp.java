@@ -363,6 +363,7 @@ abstract class BuilderComp implements Posc, Statusc, Teamc, Rotc{
         float tx = plan.drawx(), ty = plan.drawy();
 
         Lines.stroke(1f, plan.breaking ? Pal.remove : Pal.accent);
+        if(renderer.animateShields) renderer.beamQueued = true;
         Draw.z(Layer.buildBeam);
 
         Draw.alpha(buildAlpha);
