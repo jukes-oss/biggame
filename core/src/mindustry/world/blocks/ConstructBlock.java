@@ -112,7 +112,12 @@ public class ConstructBlock extends Block{
 
         if(fogControl.isVisibleTile(team, tile.x, tile.y)){
             block.placeEffect.at(tile.drawx(), tile.drawy(), block.size);
-            if(shouldPlay()) block.placeSound.at(tile, block.placePitchChange ? calcPitch(true) : 1f);
+            if(shouldPlay()){
+                float pitch = block.placePitchChange ? calcPitch(true) : 1f;
+                block.placeSound.at(tile, pitch);
+                // 低沉的一层，和点击声叠在一起，听起来像落地。
+                Sounds.explosionDull.at(tile.drawx(), tile.drawy(), Mathf.clamp(pitch * 0.62f, 0.5f, 2f), 0.36f);
+            }
         }
 
         block.placeEnded(tile, builder, rotation, config);

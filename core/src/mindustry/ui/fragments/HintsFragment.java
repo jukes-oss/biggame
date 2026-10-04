@@ -51,7 +51,7 @@ public class HintsFragment{
                 }else if(!current.show()){ //current became hidden
                     hide();
                 }
-            }else if(hints.size > 0){
+            }else if(hints.size > 0 && (ui.opening == null || !ui.opening.active())){
                 //check one hint each frame to see if it should be shown.
                 Hint hint = hints.find(Hint::show);
                 if(hint != null && hint.complete()){
@@ -104,6 +104,7 @@ public class HintsFragment{
 
     void checkNext(){
         if(current != null) return;
+        if(ui.opening != null && ui.opening.active()) return;
 
         hints.removeAll(h -> !h.valid() || h.finished() || (h.show() && h.complete()));
         hints.sort(Hint::order);
@@ -117,6 +118,7 @@ public class HintsFragment{
 
     void display(Hint hint){
         if(current != null) return;
+        if(ui.opening != null && ui.opening.active()) return;
 
         group.fill(t -> {
             last = t;

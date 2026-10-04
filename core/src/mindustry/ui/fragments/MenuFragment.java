@@ -87,7 +87,7 @@ public class MenuFragment{
 
             parent.fill(c -> {
                 c.bottom().left();
-                c.button(Icon.terminal, () -> ui.consolefrag.toggleMobile()).visible(() -> !ui.consolefrag.shown() && Core.settings.getBool("console")).pad(4f).size(60f).left().row();
+                c.button(Icon.terminal, () -> ui.consolefrag.toggleMobile()).visible(() -> !ui.consolefrag.shown() && Core.settings.getBool("console")).pad(8f).size(72f).left().row();
 
                 c.button("", new TextButtonStyle(){{
                     font = Fonts.def;
@@ -136,8 +136,14 @@ public class MenuFragment{
         container.name = "buttons";
         container.setSize(Core.graphics.getWidth(), Core.graphics.getHeight());
 
-        float size = 120f;
-        container.defaults().size(size).pad(5).padTop(4f);
+        boolean portrait = Core.graphics.isPortrait();
+        // 竖屏格子更大，并留出 logo 的高度，避免字和图标叠在一起。
+        float size = portrait ? 136f : 120f;
+        float gap = portrait ? 8f : 6f;
+        int columns = portrait ? 2 : 4;
+        container.defaults().size(size).pad(gap);
+        float side = Math.max(8f, (Core.graphics.getWidth() - (size + gap * 2f) * columns) / 2f);
+        container.margin(portrait ? 108f : 72f, side, 16f, side);
 
         MobileButton
             play = new MobileButton(Icon.play, "@campaign", () -> checkPlay(ui.planet::show)),
@@ -153,7 +159,6 @@ public class MenuFragment{
         Seq<MobileButton> customs = customButtons.map(b -> new MobileButton(b.icon, b.text, b.runnable == null ? () -> {} : b.runnable));
 
         if(!Core.graphics.isPortrait()){
-            container.marginTop(60f);
             container.add(play);
             container.add(join);
             container.add(custom);
@@ -173,7 +178,6 @@ public class MenuFragment{
             }
             container.add(ios ? about : exit);
         }else{
-            container.marginTop(0f);
             container.add(play);
             container.add(maps);
             container.row();

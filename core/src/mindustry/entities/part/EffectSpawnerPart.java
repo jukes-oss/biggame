@@ -43,6 +43,7 @@ public class EffectSpawnerPart extends DrawPart{
                 v1.set(x * sign, y).rotate(params.rotation - 90).add(params.x, params.y);
 
                 float z = Draw.z();
+                if(Vars.renderer.animateShields) Vars.renderer.beamQueued = true;
                 Draw.z(Layer.buildBeam);
                 Draw.color(Color.red);
                 Draw.rect("error", v1.x, v1.y, width, height, rot - 90f);

@@ -513,6 +513,9 @@ public class Weapon implements Cloneable{
 
         if(!continuous){
             shootSound.at(bulletX, bulletY, Mathf.random(soundPitchMin, soundPitchMax), shootSoundVolume);
+            if(shootSound != Sounds.none){
+                Sounds.explosionDull.at(bulletX, bulletY, Mathf.random(0.9f, 1.15f), shootSoundVolume * 0.2f);
+            }
         }else{
             initialShootSound.at(bulletX, bulletY, Mathf.random(soundPitchMin, soundPitchMax), shootSoundVolume);
         }

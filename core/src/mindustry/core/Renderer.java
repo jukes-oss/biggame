@@ -40,6 +40,8 @@ public class Renderer implements ApplicationListener{
     public @Nullable FrameBuffer backgroundBuffer;
     public FrameBuffer effectBuffer = new FrameBuffer();
     public boolean animateShields, animateWater, drawWeather = true, drawStatus, enableEffects, drawDisplays = true, drawLight = true, pixelate = false, showPings = true, showOtherBuildPlans = true;
+    /** Set while something queues a draw into the shield or build-beam layer. */
+    public boolean shieldQueued, beamQueued;
     public float weatherAlpha;
     /** minZoom = zooming out, maxZoom = zooming in, used by cutscenes */
     public float minZoom = 1.5f, maxZoom = 6f;
@@ -313,6 +315,7 @@ public class Renderer implements ApplicationListener{
 
         graphics.clear(clearColor);
         Draw.reset();
+        shieldQueued = beamQueued = false;
 
         if(animateWater || animateShields){
             effectBuffer.resize(graphics.getWidth(), graphics.getHeight());
@@ -400,19 +403,6 @@ public class Renderer implements ApplicationListener{
 
         Draw.draw(Layer.plans, overlays::drawBottom);
 
-        if(animateShields && Shaders.shield != null){
-            //TODO would be nice if there were a way to detect if any shields or build beams actually *exist* before beginning/ending buffers, otherwise you're just blitting and swapping shaders for nothing
-            Draw.drawRange(Layer.shields, 1f, () -> effectBuffer.begin(Color.clear), () -> {
-                effectBuffer.end();
-                effectBuffer.blit(Shaders.shield);
-            });
-
-            Draw.drawRange(Layer.buildBeam, 1f, () -> effectBuffer.begin(Color.clear), () -> {
-                effectBuffer.end();
-                effectBuffer.blit(Shaders.buildBeam);
-            });
-        }
-
         Draw.reset();
 
         Draw.draw(Layer.overlayUI, overlays::drawTop);
@@ -431,6 +421,23 @@ public class Renderer implements ApplicationListener{
         blocks.drawBlocks();
 
         Groups.draw.draw(Drawc::draw);
+
+        //fullscreen shield/beam blits are wasted when nothing queued a draw into that layer
+        if(animateShields && Shaders.shield != null){
+            if(shieldQueued){
+                Draw.drawRange(Layer.shields, 1f, () -> effectBuffer.begin(Color.clear), () -> {
+                    effectBuffer.end();
+                    effectBuffer.blit(Shaders.shield);
+                });
+            }
+
+            if(beamQueued){
+                Draw.drawRange(Layer.buildBeam, 1f, () -> effectBuffer.begin(Color.clear), () -> {
+                    effectBuffer.end();
+                    effectBuffer.blit(Shaders.buildBeam);
+                });
+            }
+        }
 
         if(settings.getBool("drawhitboxes")){
             DebugCollisionRenderer.draw();

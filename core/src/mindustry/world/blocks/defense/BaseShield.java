@@ -126,6 +126,7 @@ public class BaseShield extends Block{
             if(!broken){
                 float radius = radius();
 
+                if(renderer.animateShields) renderer.shieldQueued = true;
                 Draw.z(Layer.shields);
 
                 Draw.color(shieldColor == null ? team.color : shieldColor, Color.white, Mathf.clamp(hit));

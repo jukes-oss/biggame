@@ -3325,13 +3325,14 @@ public class Blocks{
                         progress = PartProgress.recoil;
                         recoilIndex = f;
                         under = true;
-                        moveY = -1.5f;
+                        moveY = -3.4f;
                     }});
                 }
             }};
 
             shootSound = Sounds.shootDuo;
-            recoil = 0.5f;
+            recoil = 2.4f;
+            shake = 1.15f;
             shootY = 3f;
             reload = 20f;
             range = 160;
